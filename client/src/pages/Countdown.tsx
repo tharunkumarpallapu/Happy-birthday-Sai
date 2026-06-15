@@ -220,35 +220,116 @@ export function Countdown({ onNavigate, onPrevious }: CountdownProps) {
         ))}
       </motion.div>
 
-      {/* Progress section */}
+      {/* Romantic Journey Tracker */}
       <motion.div
-        className="mt-10 w-full max-w-sm space-y-3"
+        className="mt-12 w-full max-w-2xl space-y-4"
         variants={fadeInUp}
         initial="initial"
         animate="animate"
       >
-        <p className="text-center text-white/70 text-sm italic">
-          Countdown to the most beautiful day of the year ❤️
-        </p>
-
-        {/* Progress bar */}
-        <div className="space-y-2">
-          <div className="flex justify-between text-xs text-white/60">
-            <span>Passed {progress.toFixed(1)}%</span>
-            <span>Remaining {(100 - progress).toFixed(1)}%</span>
-          </div>
-          <div className="h-2 bg-white/10 rounded-full overflow-hidden neon-border">
-            <motion.div
-              className="h-full bg-gradient-to-r from-[#FF1493] to-[#A020F0]"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.5 }}
-              style={{
-                boxShadow: '0 0 10px rgba(255, 20, 147, 0.8)',
-              }}
-            />
-          </div>
+        {/* Section title */}
+        <div className="text-center space-y-1">
+          <h2 className="text-2xl font-bold text-[#FF1493] animate-glow-pulse">
+            ❤️ Our Journey ❤️
+          </h2>
+          <p className="text-sm text-white/60">From 10th Class to Forever ♾</p>
         </div>
+
+        {/* Timeline container */}
+        <motion.div
+          className="glass-intense rounded-xl p-6 space-y-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          {/* Horizontal timeline */}
+          <div className="relative flex items-center justify-between px-2">
+            {/* Timeline line background */}
+            <div className="absolute top-1/2 left-0 right-0 h-1 bg-white/10 rounded-full" />
+
+            {/* Timeline line fill */}
+            <motion.div
+              className="absolute top-1/2 left-0 h-1 bg-gradient-to-r from-[#FF1493] to-[#A020F0] rounded-full"
+              style={{
+                boxShadow: '0 0 20px rgba(255, 20, 147, 0.8)',
+              }}
+              initial={{ width: '0%' }}
+              animate={{ width: '60%' }}
+              transition={{ duration: 2, ease: 'easeOut' }}
+            />
+
+            {/* Timeline milestones */}
+            {[
+              { emoji: '✨', label: '10th Class', position: 0 },
+              { emoji: '💕', label: 'Friendship', position: 25 },
+              { emoji: '🌹', label: 'Beautiful Memories', position: 50 },
+              { emoji: '❤️', label: 'Today', position: 75, isActive: true },
+              { emoji: '♾', label: 'Forever', position: 100, isFinal: true },
+            ].map((milestone, idx) => (
+              <motion.div
+                key={idx}
+                className="relative z-10 flex flex-col items-center"
+                style={{ left: `${milestone.position}%` }}
+              >
+                {/* Milestone dot with glow */}
+                <motion.div
+                  className={`relative flex items-center justify-center rounded-full transition-all ${
+                    milestone.isActive
+                      ? 'w-14 h-14 bg-gradient-to-br from-[#FF1493] to-[#A020F0]'
+                      : milestone.isFinal
+                      ? 'w-12 h-12 bg-gradient-to-br from-[#A020F0] to-[#FF1493]'
+                      : 'w-10 h-10 bg-white/20 hover:bg-white/30'
+                  }`}
+                  animate={{
+                    scale: milestone.isActive ? [1, 1.15, 1] : milestone.isFinal ? [1, 1.1, 1] : 1,
+                    boxShadow: milestone.isActive
+                      ? [
+                          '0 0 20px rgba(255, 20, 147, 0.6)',
+                          '0 0 40px rgba(255, 20, 147, 0.9)',
+                          '0 0 20px rgba(255, 20, 147, 0.6)',
+                        ]
+                      : milestone.isFinal
+                      ? [
+                          '0 0 15px rgba(160, 32, 240, 0.6)',
+                          '0 0 30px rgba(160, 32, 240, 0.9)',
+                          '0 0 15px rgba(160, 32, 240, 0.6)',
+                        ]
+                      : 'none',
+                  }}
+                  transition={{
+                    duration: milestone.isActive || milestone.isFinal ? 2 : 0,
+                    repeat: milestone.isActive || milestone.isFinal ? Infinity : 0,
+                    ease: 'easeInOut',
+                  }}
+                >
+                  <span className="text-lg">{milestone.emoji}</span>
+                </motion.div>
+
+                {/* Milestone label */}
+                <motion.p
+                  className={`text-xs mt-3 font-semibold whitespace-nowrap ${
+                    milestone.isActive ? 'text-[#FF1493]' : milestone.isFinal ? 'text-[#A020F0]' : 'text-white/60'
+                  }`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 + idx * 0.1 }}
+                >
+                  {milestone.label}
+                </motion.p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Bottom romantic text */}
+        <motion.p
+          className="text-center text-white/70 text-sm italic"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
+        >
+          Every day adds another beautiful chapter to our story ❤️
+        </motion.p>
       </motion.div>
 
       {/* CTA Button */}
