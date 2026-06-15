@@ -14,8 +14,12 @@ import { SecretLetters } from "./pages/SecretLetters";
 import { MemoryUniverse } from "./pages/MemoryUniverse";
 import { StoryInNumbers } from "./pages/StoryInNumbers";
 import { BirthdayVault } from "./pages/BirthdayVault";
+import { BirthdayCelebration } from "./pages/BirthdayCelebration";
+import { SpecialVideo } from "./pages/SpecialVideo";
+import { FinalLetter } from "./pages/FinalLetter";
+import { FinalEnding } from "./pages/FinalEnding";
 
-type PageType = 'welcome' | 'countdown' | 'timeline' | 'gallery' | 'letters' | 'universe' | 'numbers' | 'vault';
+type PageType = 'welcome' | 'countdown' | 'timeline' | 'gallery' | 'letters' | 'universe' | 'numbers' | 'vault' | 'celebration' | 'video' | 'final-letter' | 'ending';
 
 function StoryApp() {
   const [currentPage, setCurrentPage] = useState<PageType>('welcome');
@@ -59,6 +63,18 @@ function StoryApp() {
           case 'numbers':
             handleNavigate('vault');
             break;
+          case 'vault':
+            handleNavigate('celebration');
+            break;
+          case 'celebration':
+            handleNavigate('video');
+            break;
+          case 'video':
+            handleNavigate('final-letter');
+            break;
+          case 'final-letter':
+            handleNavigate('ending');
+            break;
         }
       } else if (e.key === 'ArrowLeft') {
         switch (currentPage) {
@@ -82,6 +98,18 @@ function StoryApp() {
             break;
           case 'vault':
             handleNavigate('numbers');
+            break;
+          case 'celebration':
+            handleNavigate('vault');
+            break;
+          case 'video':
+            handleNavigate('celebration');
+            break;
+          case 'final-letter':
+            handleNavigate('video');
+            break;
+          case 'ending':
+            handleNavigate('final-letter');
             break;
         }
       }
@@ -145,6 +173,34 @@ function StoryApp() {
         return (
           <BirthdayVault
             onPrevious={() => handleNavigate('numbers')}
+          />
+        );
+      case 'celebration':
+        return (
+          <BirthdayCelebration
+            onNavigate={() => handleNavigate('video')}
+            onPrevious={() => handleNavigate('vault')}
+          />
+        );
+      case 'video':
+        return (
+          <SpecialVideo
+            onNavigate={() => handleNavigate('final-letter')}
+            onPrevious={() => handleNavigate('celebration')}
+          />
+        );
+      case 'final-letter':
+        return (
+          <FinalLetter
+            onNavigate={() => handleNavigate('ending')}
+            onPrevious={() => handleNavigate('video')}
+          />
+        );
+      case 'ending':
+        return (
+          <FinalEnding
+            onReplay={() => handleNavigate('welcome')}
+            onPrevious={() => handleNavigate('final-letter')}
           />
         );
       default:
