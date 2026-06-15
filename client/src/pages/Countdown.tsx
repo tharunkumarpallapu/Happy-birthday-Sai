@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
-import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { fadeInUp, scaleIn, staggerContainer } from '@/lib/animations';
+import { fadeInUp, staggerContainer } from '@/lib/animations';
 
 interface CountdownProps {
   onNavigate: () => void;
@@ -17,10 +16,10 @@ interface TimeLeft {
 
 export function Countdown({ onNavigate, onPrevious }: CountdownProps) {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
+    days: 9,
+    hours: 8,
+    minutes: 44,
+    seconds: 21,
   });
   const [progress, setProgress] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -29,7 +28,6 @@ export function Countdown({ onNavigate, onPrevious }: CountdownProps) {
     window.scrollTo(0, 0);
 
     const calculateCountdown = () => {
-      // Target date: June 25, 2026, 12:00 AM
       const targetDate = new Date(2026, 5, 25, 12, 0, 0).getTime();
       const now = new Date().getTime();
       const difference = targetDate - now;
@@ -42,7 +40,6 @@ export function Countdown({ onNavigate, onPrevious }: CountdownProps) {
 
         setTimeLeft({ days, hours, minutes, seconds });
 
-        // Calculate progress percentage (assuming 365 days total)
         const totalSeconds = 365 * 24 * 60 * 60;
         const remainingSeconds = difference / 1000;
         const progressPercent = ((totalSeconds - remainingSeconds) / totalSeconds) * 100;
@@ -56,35 +53,6 @@ export function Countdown({ onNavigate, onPrevious }: CountdownProps) {
     return () => clearInterval(interval);
   }, []);
 
-  const CountdownBox = ({
-    value,
-    label,
-  }: {
-    value: number;
-    label: string;
-  }) => (
-    <motion.div
-      className="flex flex-col items-center space-y-2"
-      whileHover={{ scale: 1.05 }}
-      transition={{ type: 'spring', stiffness: 300 }}
-    >
-      <div className="glass-intense rounded-lg px-4 py-3 min-w-20">
-        <motion.div
-          className="text-3xl font-bold text-[#FF1493] text-glow-pink"
-          key={value}
-          initial={{ scale: 0.5, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.3 }}
-        >
-          {String(value).padStart(2, '0')}
-        </motion.div>
-      </div>
-      <span className="text-xs uppercase tracking-widest text-white/60 font-semibold">
-        {label}
-      </span>
-    </motion.div>
-  );
-
   return (
     <motion.div
       ref={containerRef}
@@ -93,121 +61,185 @@ export function Countdown({ onNavigate, onPrevious }: CountdownProps) {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
     >
-      {/* Content Container */}
+      {/* Header */}
       <motion.div
-        className="relative z-10 max-w-md w-full space-y-8"
+        className="absolute top-12 left-0 right-0 text-center z-10"
         variants={staggerContainer}
         initial="initial"
         animate="animate"
       >
-        {/* Header */}
-        <motion.div variants={fadeInUp} className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-[#FF1493] animate-glow-pulse">
+        <motion.div variants={fadeInUp} className="space-y-1">
+          <h1 className="text-3xl font-bold text-[#FF1493] animate-glow-pulse">
             ❤️ Our Special Day ❤️
           </h1>
-          <p className="text-lg text-white/80">June 25, 12:00 AM</p>
-          <p className="text-sm text-white/60">The day you were born ✨</p>
+          <p className="text-sm text-white/60">June 25, 12:00 AM</p>
+          <p className="text-xs text-white/50">The day you were born ✨</p>
         </motion.div>
+      </motion.div>
 
-        {/* Large Heart Ring with Countdown */}
+      {/* Main heart-shaped countdown frame */}
+      <motion.div
+        className="relative w-72 h-80 flex items-center justify-center mt-8"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+      >
+        {/* Heart glow effect */}
         <motion.div
-          variants={scaleIn}
-          className="flex justify-center py-8"
+          className="absolute inset-0 -m-16"
+          animate={{
+            opacity: [0.4, 0.8, 0.4],
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
         >
-          <div className="relative w-64 h-64">
-            {/* Background circle */}
-            <svg
-              className="absolute inset-0 w-full h-full"
-              viewBox="0 0 200 200"
-              style={{ transform: 'rotate(-90deg)' }}
-            >
-              {/* Progress ring background */}
-              <circle
-                cx="100"
-                cy="100"
-                r="90"
-                fill="none"
-                stroke="rgba(255, 20, 147, 0.1)"
-                strokeWidth="2"
-              />
-              {/* Progress ring */}
-              <motion.circle
-                cx="100"
-                cy="100"
-                r="90"
-                fill="none"
-                stroke="#FF1493"
-                strokeWidth="3"
-                strokeDasharray={`${2 * Math.PI * 90}`}
-                initial={{ strokeDashoffset: `${2 * Math.PI * 90}` }}
-                animate={{
-                  strokeDashoffset: `${2 * Math.PI * 90 * (1 - progress / 100)}`,
-                }}
-                transition={{ duration: 0.5 }}
-                strokeLinecap="round"
-                filter="drop-shadow(0 0 10px rgba(255, 20, 147, 0.6))"
-              />
-            </svg>
-
-            {/* Heart in center */}
-            <motion.div
-              className="absolute inset-0 flex items-center justify-center"
-              animate={{
-                scale: [1, 1.15, 1],
-              }}
-              transition={{
-                duration: 1.2,
-                repeat: Infinity,
-                ease: 'easeInOut',
-              }}
-            >
-              <div className="text-6xl">❤️</div>
-            </motion.div>
-
-            {/* Days left text */}
-            <motion.div
-              className="absolute inset-0 flex flex-col items-center justify-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              <div className="text-center mt-16">
-                <p className="text-sm text-white/60 mb-1">Only</p>
-                <motion.p
-                  className="text-5xl font-bold text-[#FF1493] text-glow-pink"
-                  key={timeLeft.days}
-                  initial={{ scale: 0.5 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {timeLeft.days.toString().padStart(2, '0')}
-                </motion.p>
-                <p className="text-xs text-white/60 mt-1">Days Left</p>
-              </div>
-            </motion.div>
-          </div>
+          <svg
+            viewBox="0 0 100 100"
+            className="w-full h-full"
+            style={{
+              filter: 'drop-shadow(0 0 50px rgba(255, 20, 147, 0.7)) drop-shadow(0 0 100px rgba(160, 32, 240, 0.4))',
+            }}
+          >
+            <path
+              d="M50 90 C20 75, 5 60, 5 45 C5 30, 15 20, 25 20 C35 20, 45 30, 50 40 C55 30, 65 20, 75 20 C85 20, 95 30, 95 45 C95 60, 80 75, 50 90 Z"
+              fill="none"
+              stroke="#FF1493"
+              strokeWidth="1"
+              opacity="0.4"
+            />
+          </svg>
         </motion.div>
 
-        {/* Countdown boxes */}
-        <motion.div
-          variants={fadeInUp}
-          className="grid grid-cols-4 gap-2"
+        {/* Main heart outline with strong glow */}
+        <svg
+          viewBox="0 0 100 100"
+          className="absolute w-72 h-80"
+          style={{
+            filter: 'drop-shadow(0 0 40px rgba(255, 20, 147, 0.9)) drop-shadow(0 0 80px rgba(255, 20, 147, 0.5))',
+          }}
         >
-          <CountdownBox value={timeLeft.days} label="Days" />
-          <CountdownBox value={timeLeft.hours} label="Hours" />
-          <CountdownBox value={timeLeft.minutes} label="Minutes" />
-          <CountdownBox value={timeLeft.seconds} label="Seconds" />
-        </motion.div>
+          <path
+            d="M50 90 C20 75, 5 60, 5 45 C5 30, 15 20, 25 20 C35 20, 45 30, 50 40 C55 30, 65 20, 75 20 C85 20, 95 30, 95 45 C95 60, 80 75, 50 90 Z"
+            fill="none"
+            stroke="#FF1493"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
 
-        {/* Progress indicator */}
-        <motion.div variants={fadeInUp} className="space-y-3">
+        {/* Heart fill with gradient */}
+        <svg
+          viewBox="0 0 100 100"
+          className="absolute w-72 h-80"
+          style={{
+            opacity: 0.12,
+          }}
+        >
+          <defs>
+            <linearGradient id="heartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#FF1493" />
+              <stop offset="100%" stopColor="#A020F0" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M50 90 C20 75, 5 60, 5 45 C5 30, 15 20, 25 20 C35 20, 45 30, 50 40 C55 30, 65 20, 75 20 C85 20, 95 30, 95 45 C95 60, 80 75, 50 90 Z"
+            fill="url(#heartGradient)"
+          />
+        </svg>
+
+        {/* Countdown content inside heart */}
+        <div className="relative z-10 flex flex-col items-center justify-center space-y-3">
+          {/* Only label */}
+          <motion.p
+            className="text-sm text-white/70 font-light tracking-wide"
+            animate={{
+              opacity: [0.6, 1, 0.6],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          >
+            Only
+          </motion.p>
+
+          {/* Main countdown number with heartbeat */}
+          <motion.div
+            className="text-6xl font-bold text-[#FF1493] text-glow-pink"
+            animate={{
+              scale: [1, 1.08, 1],
+            }}
+            transition={{
+              duration: 1.2,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          >
+            {String(timeLeft.days).padStart(2, '0')}
+          </motion.div>
+
+          {/* Days Left label */}
+          <p className="text-xs text-white/60 font-light tracking-wide">Days Left</p>
+        </div>
+      </motion.div>
+
+      {/* Countdown cards below */}
+      <motion.div
+        className="mt-12 grid grid-cols-4 gap-3 max-w-sm"
+        variants={staggerContainer}
+        initial="initial"
+        animate="animate"
+      >
+        {[
+          { value: timeLeft.days, label: 'DAYS' },
+          { value: timeLeft.hours, label: 'HOURS' },
+          { value: timeLeft.minutes, label: 'MINUTES' },
+          { value: timeLeft.seconds, label: 'SECONDS' },
+        ].map((item, i) => (
+          <motion.div
+            key={i}
+            variants={fadeInUp}
+            className="glass-intense rounded-lg p-3 text-center"
+          >
+            <motion.div
+              className="text-2xl font-bold text-[#FF1493] text-glow-pink"
+              key={item.value}
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              {String(item.value).padStart(2, '0')}
+            </motion.div>
+            <div className="text-xs text-white/60 mt-1 font-light">{item.label}</div>
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* Progress section */}
+      <motion.div
+        className="mt-10 w-full max-w-sm space-y-3"
+        variants={fadeInUp}
+        initial="initial"
+        animate="animate"
+      >
+        <p className="text-center text-white/70 text-sm italic">
+          Countdown to the most beautiful day of the year ❤️
+        </p>
+
+        {/* Progress bar */}
+        <div className="space-y-2">
           <div className="flex justify-between text-xs text-white/60">
-            <span>Passed</span>
-            <span>Remaining</span>
+            <span>Passed {progress.toFixed(1)}%</span>
+            <span>Remaining {(100 - progress).toFixed(1)}%</span>
           </div>
-          <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden neon-border">
+          <div className="h-2 bg-white/10 rounded-full overflow-hidden neon-border">
             <motion.div
-              className="h-full bg-gradient-to-r from-[#FF1493] to-[#FF4DA6]"
+              className="h-full bg-gradient-to-r from-[#FF1493] to-[#A020F0]"
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.5 }}
@@ -216,66 +248,47 @@ export function Countdown({ onNavigate, onPrevious }: CountdownProps) {
               }}
             />
           </div>
-          <div className="flex justify-between text-sm font-semibold text-[#FF1493]">
-            <span>{progress.toFixed(1)}%</span>
-            <span>{(100 - progress).toFixed(1)}%</span>
-          </div>
-        </motion.div>
-
-        {/* Descriptive text */}
-        <motion.p
-          variants={fadeInUp}
-          className="text-center text-white/70 text-sm leading-relaxed"
-        >
-          Countdown to the most beautiful day of the year ❤️
-        </motion.p>
+        </div>
       </motion.div>
 
-      {/* Navigation buttons */}
-      <motion.div
-        className="absolute top-8 left-8 right-8 flex justify-between z-20"
+      {/* CTA Button */}
+      <motion.button
+        onClick={onNavigate}
+        className="mt-10 px-8 py-3 bg-gradient-to-r from-[#FF1493] to-[#FF4DA6] text-white font-semibold rounded-full neon-border-thick hover:shadow-lg transition-all"
+        whileHover={{
+          scale: 1.05,
+          boxShadow: '0 0 30px rgba(255, 20, 147, 0.8)',
+        }}
+        whileTap={{ scale: 0.95 }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
+        transition={{ delay: 0.8 }}
       >
-        <button
-          onClick={onPrevious}
-          className="p-3 rounded-full glass hover:bg-white/10 transition-all"
-          aria-label="Previous page"
-        >
-          <ChevronUp className="w-6 h-6 text-[#FF1493]" />
-        </button>
-        <button
-          onClick={onNavigate}
-          className="p-3 rounded-full glass hover:bg-white/10 transition-all"
-          aria-label="Next page"
-        >
-          <ChevronDown className="w-6 h-6 text-[#FF1493]" />
-        </button>
-      </motion.div>
+        Next ❤️
+      </motion.button>
 
-      {/* Floating particles */}
-      {Array.from({ length: 6 }).map((_, i) => (
+      {/* Floating hearts */}
+      {Array.from({ length: 8 }).map((_, i) => (
         <motion.div
-          key={`countdown-particle-${i}`}
-          className="absolute text-lg text-[#FF1493] opacity-20"
+          key={`countdown-heart-${i}`}
+          className="fixed text-3xl opacity-20 pointer-events-none"
           style={{
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
           }}
           animate={{
-            y: [0, -40, 0],
-            x: [0, Math.random() * 30 - 15, 0],
-            opacity: [0.1, 0.3, 0.1],
+            y: [0, -80, 0],
+            x: [0, Math.sin(i) * 50, 0],
+            opacity: [0.1, 0.4, 0.1],
           }}
           transition={{
-            duration: Math.random() * 6 + 6,
+            duration: Math.random() * 8 + 10,
             repeat: Infinity,
             delay: Math.random() * 2,
             ease: 'easeInOut',
           }}
         >
-          ✨
+          ❤️
         </motion.div>
       ))}
     </motion.div>
