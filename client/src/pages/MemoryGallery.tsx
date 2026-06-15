@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronUp, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { fadeInUp, staggerContainer } from '@/lib/animations';
 
@@ -13,6 +13,7 @@ interface GalleryItem {
 }
 
 interface MemoryGalleryProps {
+  onNavigate?: () => void;
   onPrevious: () => void;
 }
 
@@ -29,7 +30,7 @@ const galleryItems: GalleryItem[] = [
 
 const filters: FilterType[] = ['All', 'Memories', 'Trips', 'Special', 'Us'];
 
-export function MemoryGallery({ onPrevious }: MemoryGalleryProps) {
+export function MemoryGallery({ onNavigate, onPrevious }: MemoryGalleryProps) {
   const [activeFilter, setActiveFilter] = useState<FilterType>('All');
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -282,13 +283,15 @@ export function MemoryGallery({ onPrevious }: MemoryGalleryProps) {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
       >
-        <button
-          onClick={onPrevious}
-          className="p-3 rounded-full glass hover:bg-white/10 transition-all"
-          aria-label="Previous page"
-        >
-          <ChevronUp className="w-6 h-6 text-[#FF1493]" />
-        </button>
+        {onNavigate && (
+          <button
+            onClick={onNavigate}
+            className="p-3 rounded-full glass hover:bg-white/10 transition-all"
+            aria-label="Next page"
+          >
+            <ChevronDown className="w-6 h-6 text-[#FF1493]" />
+          </button>
+        )}
       </motion.div>
 
       {/* Floating elements */}
