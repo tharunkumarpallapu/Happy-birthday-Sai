@@ -235,66 +235,55 @@ export function Countdown({ onNavigate, onPrevious }: CountdownProps) {
           <p className="text-sm text-white/60">From 10th Class to Forever ♾</p>
         </div>
 
-        {/* Timeline container */}
+        {/* Premium Vertical Timeline Container */}
         <motion.div
-          className="glass-intense rounded-xl p-6 space-y-4"
+          className="glass-intense rounded-2xl p-8 relative"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          {/* Horizontal timeline */}
-          <div className="relative flex items-center justify-between px-2">
-            {/* Timeline line background */}
-            <div className="absolute top-1/2 left-0 right-0 h-1 bg-white/10 rounded-full" />
+          {/* Vertical timeline line */}
+          <div className="absolute left-1/2 transform -translate-x-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-[#FF1493] via-[#A020F0] to-[#FF1493] rounded-full" style={{ boxShadow: '0 0 30px rgba(255, 20, 147, 0.6)' }} />
 
-            {/* Timeline line fill */}
-            <motion.div
-              className="absolute top-1/2 left-0 h-1 bg-gradient-to-r from-[#FF1493] to-[#A020F0] rounded-full"
-              style={{
-                boxShadow: '0 0 20px rgba(255, 20, 147, 0.8)',
-              }}
-              initial={{ width: '0%' }}
-              animate={{ width: '60%' }}
-              transition={{ duration: 2, ease: 'easeOut' }}
-            />
-
-            {/* Timeline milestones */}
+          {/* Timeline milestones */}
+          <div className="relative space-y-12">
             {[
-              { emoji: '✨', label: '10th Class', position: 0 },
-              { emoji: '💕', label: 'Friendship', position: 25 },
-              { emoji: '🌹', label: 'Beautiful Memories', position: 50 },
-              { emoji: '❤️', label: 'Today', position: 75, isActive: true },
-              { emoji: '♾', label: 'Forever', position: 100, isFinal: true },
+              { emoji: '✨', label: '10th Class', description: 'Where it all began' },
+              { emoji: '💌', label: 'First Conversation', description: 'The spark ignited' },
+              { emoji: '🌹', label: 'Beautiful Memories', description: 'Countless moments together' },
+              { emoji: '❤️', label: 'Today', description: 'Our special day', isActive: true },
+              { emoji: '♾', label: 'Forever', description: 'Endless love awaits', isFinal: true },
             ].map((milestone, idx) => (
               <motion.div
                 key={idx}
-                className="relative z-10 flex flex-col items-center"
-                style={{ left: `${milestone.position}%` }}
+                className="relative flex items-center gap-6"
+                initial={{ opacity: 0, x: idx % 2 === 0 ? -20 : 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5 + idx * 0.15 }}
               >
-                {/* Milestone dot with glow */}
+                {/* Left content (alternating) */}
+                {idx % 2 === 0 ? (
+                  <div className="flex-1 text-right pr-4">
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.6 + idx * 0.15 }}
+                    >
+                      <p className={`text-sm font-semibold ${
+                        milestone.isActive ? 'text-[#FF1493]' : milestone.isFinal ? 'text-[#A020F0]' : 'text-white/80'
+                      }`}>
+                        {milestone.label}
+                      </p>
+                      <p className="text-xs text-white/50 mt-1 italic">{milestone.description}</p>
+                    </motion.div>
+                  </div>
+                ) : null}
+
+                {/* Center milestone dot */}
                 <motion.div
-                  className={`relative flex items-center justify-center rounded-full transition-all ${
-                    milestone.isActive
-                      ? 'w-14 h-14 bg-gradient-to-br from-[#FF1493] to-[#A020F0]'
-                      : milestone.isFinal
-                      ? 'w-12 h-12 bg-gradient-to-br from-[#A020F0] to-[#FF1493]'
-                      : 'w-10 h-10 bg-white/20 hover:bg-white/30'
-                  }`}
+                  className="relative z-20 flex-shrink-0"
                   animate={{
-                    scale: milestone.isActive ? [1, 1.15, 1] : milestone.isFinal ? [1, 1.1, 1] : 1,
-                    boxShadow: milestone.isActive
-                      ? [
-                          '0 0 20px rgba(255, 20, 147, 0.6)',
-                          '0 0 40px rgba(255, 20, 147, 0.9)',
-                          '0 0 20px rgba(255, 20, 147, 0.6)',
-                        ]
-                      : milestone.isFinal
-                      ? [
-                          '0 0 15px rgba(160, 32, 240, 0.6)',
-                          '0 0 30px rgba(160, 32, 240, 0.9)',
-                          '0 0 15px rgba(160, 32, 240, 0.6)',
-                        ]
-                      : 'none',
+                    scale: milestone.isActive ? [1, 1.2, 1] : milestone.isFinal ? [1, 1.15, 1] : 1,
                   }}
                   transition={{
                     duration: milestone.isActive || milestone.isFinal ? 2 : 0,
@@ -302,31 +291,84 @@ export function Countdown({ onNavigate, onPrevious }: CountdownProps) {
                     ease: 'easeInOut',
                   }}
                 >
-                  <span className="text-lg">{milestone.emoji}</span>
+                  {/* Glow effect */}
+                  <motion.div
+                    className={`absolute inset-0 rounded-full ${
+                      milestone.isActive
+                        ? 'w-16 h-16 -m-2'
+                        : milestone.isFinal
+                        ? 'w-14 h-14 -m-1'
+                        : 'w-12 h-12'
+                    }`}
+                    animate={{
+                      boxShadow: milestone.isActive
+                        ? [
+                            '0 0 30px rgba(255, 20, 147, 0.4)',
+                            '0 0 60px rgba(255, 20, 147, 0.8)',
+                            '0 0 30px rgba(255, 20, 147, 0.4)',
+                          ]
+                        : milestone.isFinal
+                        ? [
+                            '0 0 20px rgba(160, 32, 240, 0.4)',
+                            '0 0 40px rgba(160, 32, 240, 0.7)',
+                            '0 0 20px rgba(160, 32, 240, 0.4)',
+                          ]
+                        : 'none',
+                    }}
+                    transition={{
+                      duration: milestone.isActive || milestone.isFinal ? 2 : 0,
+                      repeat: milestone.isActive || milestone.isFinal ? Infinity : 0,
+                      ease: 'easeInOut',
+                    }}
+                  />
+
+                  {/* Main milestone circle */}
+                  <div className={`relative w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold ${
+                    milestone.isActive
+                      ? 'bg-gradient-to-br from-[#FF1493] to-[#A020F0]'
+                      : milestone.isFinal
+                      ? 'bg-gradient-to-br from-[#A020F0] to-[#FF1493]'
+                      : 'bg-white/20 hover:bg-white/30'
+                  }`}
+                  style={{
+                    boxShadow: milestone.isActive
+                      ? '0 0 20px rgba(255, 20, 147, 0.8), inset 0 0 10px rgba(255, 20, 147, 0.3)'
+                      : milestone.isFinal
+                      ? '0 0 15px rgba(160, 32, 240, 0.8), inset 0 0 8px rgba(160, 32, 240, 0.3)'
+                      : 'none',
+                  }}>
+                    {milestone.emoji}
+                  </div>
                 </motion.div>
 
-                {/* Milestone label */}
-                <motion.p
-                  className={`text-xs mt-3 font-semibold whitespace-nowrap ${
-                    milestone.isActive ? 'text-[#FF1493]' : milestone.isFinal ? 'text-[#A020F0]' : 'text-white/60'
-                  }`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 + idx * 0.1 }}
-                >
-                  {milestone.label}
-                </motion.p>
+                {/* Right content (alternating) */}
+                {idx % 2 === 1 ? (
+                  <div className="flex-1 pl-4">
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.6 + idx * 0.15 }}
+                    >
+                      <p className={`text-sm font-semibold ${
+                        milestone.isActive ? 'text-[#FF1493]' : milestone.isFinal ? 'text-[#A020F0]' : 'text-white/80'
+                      }`}>
+                        {milestone.label}
+                      </p>
+                      <p className="text-xs text-white/50 mt-1 italic">{milestone.description}</p>
+                    </motion.div>
+                  </div>
+                ) : null}
               </motion.div>
             ))}
           </div>
         </motion.div>
 
-        {/* Bottom romantic text */}
+        {/* Bottom romantic quote */}
         <motion.p
-          className="text-center text-white/70 text-sm italic"
+          className="text-center text-white/70 text-sm italic mt-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
+          transition={{ delay: 1.2 }}
         >
           Every day adds another beautiful chapter to our story ❤️
         </motion.p>
