@@ -13,11 +13,13 @@ export interface NotificationOptions {
 }
 
 /**
- * NotificationManager handles all Capacitor local notification operations
- * Manages scheduling, cancellation, and permission requests
+ * CLIENT-SIDE NotificationManager
+ * Handles all Capacitor local notification operations
+ * Works completely offline in APK
  */
 export class NotificationManager {
   private static instance: NotificationManager;
+  private listeners: any[] = [];
 
   private constructor() {}
 
@@ -30,12 +32,15 @@ export class NotificationManager {
 
   /**
    * Request notification permissions from the user
-   * Required for Android 13+ and iOS
+   * Required for Android 13+ (POST_NOTIFICATIONS) and iOS
    */
   async requestPermissions(): Promise<boolean> {
     try {
+      console.log('[NotificationManager] Requesting notification permissions');
       const result = await LocalNotifications.requestPermissions();
-      return result.display === 'granted';
+      const granted = result.display === 'granted';
+      console.log(`[NotificationManager] Permission result: ${result.display}`);
+      return granted;
     } catch (error) {
       console.error('[NotificationManager] Permission request failed:', error);
       return false;
@@ -48,7 +53,9 @@ export class NotificationManager {
   async checkPermissions(): Promise<boolean> {
     try {
       const result = await LocalNotifications.checkPermissions();
-      return result.display === 'granted';
+      const granted = result.display === 'granted';
+      console.log(`[NotificationManager] Permission check: ${result.display}`);
+      return granted;
     } catch (error) {
       console.error('[NotificationManager] Permission check failed:', error);
       return false;
@@ -60,15 +67,19 @@ export class NotificationManager {
    */
   async scheduleNotification(options: NotificationOptions): Promise<number> {
     try {
-      const hasPermission = await this.checkPermissions();
+      // Check permissions
+      let hasPermission = await this.checkPermissions();
       if (!hasPermission) {
+        console.log('[NotificationManager] Permission not granted, requesting...');
         const granted = await this.requestPermissions();
         if (!granted) {
           console.warn('[NotificationManager] Notification permission denied');
           return -1;
         }
+        hasPermission = true;
       }
 
+      // Schedule notification
       await LocalNotifications.schedule({
         notifications: [
           {
@@ -85,7 +96,7 @@ export class NotificationManager {
         ],
       });
 
-      console.log(`[NotificationManager] Scheduled notification ${options.id}`);
+      console.log(`[NotificationManager] Scheduled notification ${options.id}: ${options.title}`);
       return options.id;
     } catch (error) {
       console.error('[NotificationManager] Schedule failed:', error);
@@ -96,17 +107,18 @@ export class NotificationManager {
   /**
    * Schedule multiple notifications
    */
-  async scheduleMultiple(
-    options: NotificationOptions[]
-  ): Promise<number[]> {
+  async scheduleMultiple(options: NotificationOptions[]): Promise<number[]> {
     try {
-      const hasPermission = await this.checkPermissions();
+      // Check permissions
+      let hasPermission = await this.checkPermissions();
       if (!hasPermission) {
+        console.log('[NotificationManager] Permission not granted, requesting...');
         const granted = await this.requestPermissions();
         if (!granted) {
           console.warn('[NotificationManager] Notification permission denied');
           return [];
         }
+        hasPermission = true;
       }
 
       const notifications = options.map(opt => ({
@@ -123,9 +135,7 @@ export class NotificationManager {
 
       await LocalNotifications.schedule({ notifications });
 
-      console.log(
-        `[NotificationManager] Scheduled ${options.length} notifications`
-      );
+      console.log(`[NotificationManager] Scheduled ${options.length} notifications`);
       return options.map(opt => opt.id);
     } catch (error) {
       console.error('[NotificationManager] Batch schedule failed:', error);
@@ -152,6 +162,8 @@ export class NotificationManager {
    */
   async cancelMultiple(ids: number[]): Promise<boolean> {
     try {
+      if (ids.length === 0) return true;
+      
       const notifications = ids.map(id => ({ id }));
       await LocalNotifications.cancel({ notifications });
       console.log(`[NotificationManager] Cancelled ${ids.length} notifications`);
@@ -169,8 +181,8 @@ export class NotificationManager {
     try {
       const pending = await this.getPendingNotifications();
       if (pending.length > 0) {
-        const ids = pending.map((n: any) => ({ id: n.id }));
-        await LocalNotifications.cancel({ notifications: ids });
+        const ids = pending.map((n: any) => n.id);
+        await this.cancelMultiple(ids);
       }
       console.log('[NotificationManager] Cancelled all notifications');
       return true;
@@ -186,7 +198,9 @@ export class NotificationManager {
   async getPendingNotifications(): Promise<any[]> {
     try {
       const result = await LocalNotifications.getPending();
-      return result.notifications || [];
+      const notifications = result.notifications || [];
+      console.log(`[NotificationManager] Found ${notifications.length} pending notifications`);
+      return notifications;
     } catch (error) {
       console.error('[NotificationManager] Get pending failed:', error);
       return [];
@@ -197,18 +211,23 @@ export class NotificationManager {
    * Listen to notification click events
    */
   onNotificationClicked(callback: (notification: any) => void): () => void {
-    let unsubscribe: (() => void) | null = null;
-
     LocalNotifications.addListener(
       'localNotificationActionPerformed',
-      callback
+      (event) => {
+        console.log('[NotificationManager] Notification clicked:', event);
+        callback(event);
+      }
     ).then((listener: any) => {
-      unsubscribe = () => listener.remove();
+      this.listeners.push(listener);
     });
 
     // Return unsubscribe function
     return () => {
-      if (unsubscribe) unsubscribe();
+      const index = this.listeners.length - 1;
+      if (index >= 0) {
+        this.listeners[index].remove();
+        this.listeners.splice(index, 1);
+      }
     };
   }
 
@@ -216,19 +235,33 @@ export class NotificationManager {
    * Listen to notification received events
    */
   onNotificationReceived(callback: (notification: any) => void): () => void {
-    let unsubscribe: (() => void) | null = null;
-
     LocalNotifications.addListener(
       'localNotificationReceived',
-      callback
+      (event) => {
+        console.log('[NotificationManager] Notification received:', event);
+        callback(event);
+      }
     ).then((listener: any) => {
-      unsubscribe = () => listener.remove();
+      this.listeners.push(listener);
     });
 
     // Return unsubscribe function
     return () => {
-      if (unsubscribe) unsubscribe();
+      const index = this.listeners.length - 1;
+      if (index >= 0) {
+        this.listeners[index].remove();
+        this.listeners.splice(index, 1);
+      }
     };
+  }
+
+  /**
+   * Clean up all listeners
+   */
+  cleanup(): void {
+    this.listeners.forEach(listener => listener.remove());
+    this.listeners = [];
+    console.log('[NotificationManager] Cleaned up all listeners');
   }
 }
 

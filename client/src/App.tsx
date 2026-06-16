@@ -18,6 +18,7 @@ import { BirthdayCelebration } from "./pages/BirthdayCelebration";
 import { SpecialVideo } from "./pages/SpecialVideo";
 import { FinalLetter } from "./pages/FinalLetter";
 import { FinalEnding } from "./pages/FinalEnding";
+import { modeSwitchService } from "./services/notifications";
 
 type PageType = 'welcome' | 'countdown' | 'timeline' | 'gallery' | 'letters' | 'universe' | 'numbers' | 'vault' | 'celebration' | 'video' | 'final-letter' | 'ending';
 
@@ -30,6 +31,21 @@ function StoryApp() {
     return () => {
       document.body.style.overflow = 'auto';
     };
+  }, []);
+
+  // Initialize notification system on app launch
+  useEffect(() => {
+    const initializeNotifications = async () => {
+      try {
+        console.log('[App] Initializing notification system');
+        await modeSwitchService.initialize();
+        console.log('[App] Notification system initialized successfully');
+      } catch (error) {
+        console.error('[App] Failed to initialize notification system:', error);
+      }
+    };
+
+    initializeNotifications();
   }, []);
 
   const handleNavigate = (page: PageType) => {

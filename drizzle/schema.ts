@@ -25,46 +25,4 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-/**
- * Notification state tracking for dual mode system
- * Tracks current mode (test/production), completion status, and last mode switch
- */
-export const notificationState = mysqlTable("notificationState", {
-  id: int("id").autoincrement().primaryKey(),
-  /** Current notification mode: 'test' or 'production' */
-  mode: mysqlEnum("mode", ["test", "production"]).default("test").notNull(),
-  /** Whether test mode has been completed (never runs again after June 17 12:00 AM) */
-  testModeCompleted: int("testModeCompleted").default(0).notNull(),
-  /** Timestamp of last mode switch */
-  lastModeSwitchAt: timestamp("lastModeSwitchAt").defaultNow().notNull(),
-  /** Timestamp when app was first installed */
-  firstInstalledAt: timestamp("firstInstalledAt").defaultNow().notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-
-export type NotificationState = typeof notificationState.$inferSelect;
-export type InsertNotificationState = typeof notificationState.$inferInsert;
-
-/**
- * Scheduled notifications tracking
- * Stores all scheduled notification IDs for cancellation and management
- */
-export const scheduledNotifications = mysqlTable("scheduledNotifications", {
-  id: int("id").autoincrement().primaryKey(),
-  /** Notification ID from Capacitor */
-  notificationId: int("notificationId").notNull(),
-  /** Mode this notification belongs to */
-  mode: mysqlEnum("mode", ["test", "production"]).notNull(),
-  /** Scheduled time for this notification */
-  scheduledAt: timestamp("scheduledAt").notNull(),
-  /** Message content */
-  message: text("message").notNull(),
-  /** Whether this notification has been sent */
-  sent: int("sent").default(0).notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-
-export type ScheduledNotification = typeof scheduledNotifications.$inferSelect;
-export type InsertScheduledNotification = typeof scheduledNotifications.$inferInsert;
+// TODO: Add your tables here

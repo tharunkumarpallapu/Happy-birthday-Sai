@@ -8,7 +8,7 @@ import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
-import { initializeNotificationSystem, shutdownNotificationSystem } from "../notifications";
+
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -30,14 +30,6 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 }
 
 async function startServer() {
-  try {
-    // Initialize notification system
-    await initializeNotificationSystem();
-  } catch (error) {
-    console.warn('[Server] Failed to initialize notification system:', error);
-    // Don't fail server startup if notifications fail
-  }
-
   const app = express();
   const server = createServer(app);
   // Configure body parser with larger size limit for file uploads
@@ -74,7 +66,6 @@ async function startServer() {
   // Handle graceful shutdown
   process.on('SIGTERM', () => {
     console.log('[Server] SIGTERM received, shutting down gracefully');
-    shutdownNotificationSystem();
     server.close(() => {
       console.log('[Server] Server closed');
       process.exit(0);
@@ -83,7 +74,6 @@ async function startServer() {
 
   process.on('SIGINT', () => {
     console.log('[Server] SIGINT received, shutting down gracefully');
-    shutdownNotificationSystem();
     server.close(() => {
       console.log('[Server] Server closed');
       process.exit(0);
