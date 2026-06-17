@@ -1,59 +1,27 @@
 import NotificationManager from './NotificationManager';
+import {
+  TEST_MODE_MESSAGES,
+  PRODUCTION_MODE_MORNING,
+  PRODUCTION_MODE_EVENING,
+  BIRTHDAY_MESSAGES_DYNAMIC,
+} from '@/config/notificationMessages';
 
-/**
- * Test mode messages - randomly selected every 5 minutes until June 20
- * Active from first installation until June 20
- */
-const TEST_MODE_MESSAGES = [
-  '❤️ Hey Reddy Sai, thinking about you.',
-  '🌹 Advance Happy Birthday Reddy Sai.',
-  '🎂 Just a few more days until your special day.',
-  '💖 Every moment brings us closer to your birthday.',
-  '✨ You are the most beautiful chapter of my life.',
-  '💕 Counting down to your birthday, Reddy Sai.',
-  '🌸 Wishing you happiness even before your birthday arrives.',
-  '💝 A little reminder that someone loves you deeply.',
-  '🎉 Advance Birthday Wishes, Reddy Sai.',
-  '❤️ Can\'t wait to celebrate your special day.',
-];
-
-/**
- * Production mode messages - June 20-24
- */
+// Construct PRODUCTION_MESSAGES object from imported arrays
 const PRODUCTION_MESSAGES = {
   morning: {
     title: '🌅 Good Morning Reddy Sai ❤️',
-    bodies: [
-      'Wake up sunshine, Reddy Sai ❤️',
-      'Good morning beautiful, your birthday is getting closer 🎂',
-      'A new day, a new reason to smile ❤️',
-      'Rise and shine, birthday girl 🌸',
-    ],
+    bodies: PRODUCTION_MODE_MORNING,
   },
   evening: {
     title: '🎂 Advance Birthday Wishes ❤️',
-    bodies: [
-      'Advance Happy Birthday Reddy Sai ❤️',
-      'Only a few days left until your special day 🎉',
-      'The countdown to your birthday continues 💕',
-      'Every day brings us closer to June 25 🎂',
-    ],
+    bodies: PRODUCTION_MODE_EVENING,
   },
 };
 
-/**
- * Birthday mode messages - June 25 only
- */
+// Construct BIRTHDAY_MESSAGES object from imported array
 const BIRTHDAY_MESSAGES = {
   title: '🎂 Happy Birthday Reddy Sai ❤️',
-  bodies: [
-    'Today is all about you.',
-    'May your smile shine brighter than ever.',
-    'Thank you for being the most precious person in my life.',
-    'Wishing you a day filled with love and joy.',
-    'You deserve all the happiness in the world.',
-    'Happy Birthday, my love! ❤️',
-  ],
+  bodies: BIRTHDAY_MESSAGES_DYNAMIC,
 };
 
 export interface ScheduleOptions {
