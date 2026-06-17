@@ -1,26 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Required permissions for notifications (Android 13+) -->
+    <!-- Notification permissions (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     
-    <!-- Required permissions for scheduling -->
+    <!-- Alarm scheduling permissions -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM_PERMISSION" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     
-    <!-- Required permissions for background execution -->
+    <!-- Boot completed permission -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    
+    <!-- Wake lock permission -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application>
-        <!-- Notification channel configuration -->
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="romance_story_channel" />
-
-        <!-- Boot completed receiver for rescheduling notifications on device restart -->
+        <!-- Notification receiver for handling alarm broadcasts -->
         <receiver
-            android:name=".BootCompletedReceiver"
+            android:name=".NotificationReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="MORNING_NOTIFICATION" />
+                <action android:name="NIGHT_NOTIFICATION" />
+                <action android:name="BIRTHDAY_NOTIFICATION" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Boot receiver for rescheduling alarms on device restart -->
+        <receiver
+            android:name=".BootReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
