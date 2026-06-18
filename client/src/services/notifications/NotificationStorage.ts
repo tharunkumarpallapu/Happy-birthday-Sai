@@ -1,10 +1,11 @@
 import { Preferences } from '@capacitor/preferences';
 
 export interface NotificationState {
-  mode: 'test' | 'production' | 'birthday';
+  mode: 'test' | 'production' | 'birthday' | 'normal';
   testModeCompleted: boolean;
   productionModeCompleted: boolean;
   birthdayModeCompleted: boolean;
+  normalModeStarted: boolean;
   firstInstalledAt: string;
   lastModeSwitchAt: string;
   lastScheduledAt: string;
@@ -45,6 +46,7 @@ export class NotificationStorage {
           testModeCompleted: false,
           productionModeCompleted: false,
           birthdayModeCompleted: false,
+          normalModeStarted: false,
           firstInstalledAt: now,
           lastModeSwitchAt: now,
           lastScheduledAt: '',
@@ -99,7 +101,7 @@ export class NotificationStorage {
   /**
    * Set current notification mode
    */
-  async setMode(mode: 'test' | 'production' | 'birthday'): Promise<void> {
+  async setMode(mode: 'test' | 'production' | 'birthday' | 'normal'): Promise<void> {
     try {
       const now = new Date().toISOString();
       await this.setState({
@@ -115,7 +117,7 @@ export class NotificationStorage {
   /**
    * Get current notification mode
    */
-  async getMode(): Promise<'test' | 'production' | 'birthday'> {
+  async getMode(): Promise<'test' | 'production' | 'birthday' | 'normal'> {
     try {
       const state = await this.getState();
       return state?.mode || 'test';

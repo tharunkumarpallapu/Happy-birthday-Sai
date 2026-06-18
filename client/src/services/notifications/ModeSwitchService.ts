@@ -1,13 +1,15 @@
-import NotificationStorage from './NotificationStorage';
-import NotificationScheduler from './NotificationScheduler';
-
 /**
  * CLIENT-SIDE ModeSwitchService
  * Automatically detects current date and switches notification modes
- * Test Mode: Until June 20
- * Production Mode: June 20-24
- * Birthday Mode: June 25+
+ * Test Mode: Until June 17 (12:00 PM)
+ * Production Mode: June 18-24
+ * Birthday Mode: June 25 only
+ * Normal Mode: June 26+ (NEVER return to birthday mode)
  */
+
+import NotificationStorage from './NotificationStorage';
+import NotificationScheduler from './NotificationScheduler';
+
 export class ModeSwitchService {
   private static instance: ModeSwitchService;
 
@@ -22,38 +24,56 @@ export class ModeSwitchService {
 
   /**
    * Detect current mode based on today's date
+   * CRITICAL: After June 25, NEVER return to birthday mode
    */
-  private detectCurrentMode(): 'test' | 'production' | 'birthday' {
+  private detectCurrentMode(): 'test' | 'production' | 'birthday' | 'normal' {
     const now = new Date();
     const year = 2026;
     const month = 5; // June (0-indexed)
 
-    const testModeEnd = new Date(year, month, 20, 0, 0, 0); // June 20
-    const productionModeEnd = new Date(year, month, 25, 0, 0, 0); // June 25
-    const birthdayModeEnd = new Date(year, month, 26, 0, 0, 0); // June 26 (birthday ends at midnight)
+    // Define date boundaries
+    const testModeEnd = new Date(year, month, 17, 12, 0, 0); // June 17, 12:00 PM
+    const productionModeStart = new Date(year, month, 18, 0, 0, 0); // June 18, 12:00 AM
+    const productionModeEnd = new Date(year, month, 24, 23, 59, 59); // June 24, 11:59:59 PM
+    const birthdayModeStart = new Date(year, month, 25, 0, 0, 0); // June 25, 12:00 AM
+    const birthdayModeEnd = new Date(year, month, 25, 23, 59, 59); // June 25, 11:59:59 PM
+    const normalModeStart = new Date(year, month, 26, 0, 0, 0); // June 26, 12:00 AM
 
+    // Determine mode based on current date
     if (now < testModeEnd) {
       return 'test';
-    } else if (now < productionModeEnd) {
+    } else if (now >= productionModeStart && now <= productionModeEnd) {
       return 'production';
-    } else if (now < birthdayModeEnd) {
+    } else if (now >= birthdayModeStart && now <= birthdayModeEnd) {
       return 'birthday';
+    } else if (now >= normalModeStart) {
+      return 'normal';
     } else {
-      // After birthday
-      return 'birthday';
+      // Fallback: shouldn't reach here, but default to normal
+      return 'normal';
     }
   }
 
   /**
    * Check if mode has changed and update if necessary
    * Should be called on app launch and periodically
+   * CRITICAL: Prevents birthday mode from persisting after June 25
    */
-  async checkAndSwitchMode(): Promise<'test' | 'production' | 'birthday' | null> {
+  async checkAndSwitchMode(): Promise<'test' | 'production' | 'birthday' | 'normal' | null> {
     try {
       const currentMode = this.detectCurrentMode();
       const storedMode = await NotificationStorage.getMode();
 
       console.log(`[ModeSwitchService] Current mode: ${currentMode}, Stored mode: ${storedMode}`);
+
+      // CRITICAL FIX: If stored mode is birthday but current mode is normal, force switch
+      if (storedMode === 'birthday' && currentMode === 'normal') {
+        console.log('[ModeSwitchService] CRITICAL: Birthday mode ended, switching to normal');
+        await NotificationStorage.setMode('normal');
+        await NotificationScheduler.scheduleNotifications('normal');
+        await NotificationStorage.completeBirthdayMode();
+        return 'normal';
+      }
 
       // Mode hasn't changed
       if (currentMode === storedMode) {
@@ -71,6 +91,8 @@ export class ModeSwitchService {
         await NotificationStorage.completeTestMode();
       } else if (storedMode === 'production') {
         await NotificationStorage.completeProductionMode();
+      } else if (storedMode === 'birthday') {
+        await NotificationStorage.completeBirthdayMode();
       }
 
       return currentMode;
@@ -132,18 +154,29 @@ export class ModeSwitchService {
   }
 
   /**
+   * Check if birthday has passed
+   */
+  hasBirthdayPassed(): boolean {
+    const now = new Date();
+    const birthday = new Date(2026, 5, 25, 0, 0, 0);
+    return now > birthday;
+  }
+
+  /**
    * Get current mode info
    */
   async getModeInfo(): Promise<{
-    mode: 'test' | 'production' | 'birthday';
+    mode: 'test' | 'production' | 'birthday' | 'normal';
     daysUntilBirthday: number;
     isBirthdayToday: boolean;
+    hasBirthdayPassed: boolean;
   }> {
     const mode = await NotificationStorage.getMode();
     return {
       mode,
       daysUntilBirthday: this.getDaysUntilBirthday(),
       isBirthdayToday: this.isBirthdayToday(),
+      hasBirthdayPassed: this.hasBirthdayPassed(),
     };
   }
 

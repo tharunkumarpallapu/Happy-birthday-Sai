@@ -1,43 +1,26 @@
-import NotificationManager from './NotificationManager';
-import {
-  TEST_MODE_MESSAGES,
-  PRODUCTION_MODE_MORNING,
-  PRODUCTION_MODE_EVENING,
-  BIRTHDAY_MESSAGES_DYNAMIC,
-} from '@/config/notificationMessages';
-
-// Construct PRODUCTION_MESSAGES object from imported arrays
-const PRODUCTION_MESSAGES = {
-  morning: {
-    title: '🌅 Good Morning Reddy Sai ❤️',
-    bodies: PRODUCTION_MODE_MORNING,
-  },
-  evening: {
-    title: '🎂 Advance Birthday Wishes ❤️',
-    bodies: PRODUCTION_MODE_EVENING,
-  },
-};
-
-// Construct BIRTHDAY_MESSAGES object from imported array
-const BIRTHDAY_MESSAGES = {
-  title: '🎂 Happy Birthday Reddy Sai ❤️',
-  bodies: BIRTHDAY_MESSAGES_DYNAMIC,
-};
-
-export interface ScheduleOptions {
-  mode: 'test' | 'production' | 'birthday';
-}
-
 /**
  * CLIENT-SIDE NotificationScheduler
  * Manages scheduling notifications for all modes
- * Test Mode: Random messages every 5 minutes (until June 20)
- * Production Mode: Scheduled messages at specific times (June 20-24)
- * Birthday Mode: Special messages on June 25
+ * Production: June 18-24 (Daily + Advance Birthday)
+ * Birthday: June 25 (Hourly - 24 notifications)
+ * Normal: June 26+ (Daily only)
  */
+
+import NotificationManager from './NotificationManager';
+import {
+  NOTIFICATION_MESSAGES,
+  getRandomMessage,
+  DAILY_NOTIFICATION_HOURS,
+  BIRTHDAY_NOTIFICATION_HOURS,
+} from '@/config/notificationMessagesPool';
+
+interface ScheduleOptions {
+  mode: 'test' | 'production' | 'birthday' | 'normal';
+}
+
 export class NotificationScheduler {
   private static instance: NotificationScheduler;
-  private lastTestMessage: string = '';
+  private lastMessages: Map<string, string> = new Map();
   private scheduledNotificationIds: number[] = [];
 
   private constructor() {}
@@ -51,53 +34,59 @@ export class NotificationScheduler {
 
   /**
    * Schedule all notifications for a given mode
-   * Generates all future notifications in advance
    */
-  async scheduleNotifications(mode: 'test' | 'production' | 'birthday'): Promise<void> {
+  async scheduleNotifications(mode: 'test' | 'production' | 'birthday' | 'normal'): Promise<void> {
     console.log(`[NotificationScheduler] Scheduling ${mode} mode notifications`);
 
     try {
       // Cancel existing notifications first
       await this.cancelAll();
 
-      if (mode === 'test') {
-        await this.scheduleTestMode();
-      } else if (mode === 'production') {
-        await this.scheduleProductionMode();
-      } else if (mode === 'birthday') {
-        await this.scheduleBirthdayMode();
+      switch (mode) {
+        case 'test':
+          await this.scheduleTestMode();
+          break;
+        case 'production':
+          await this.scheduleProductionMode();
+          break;
+        case 'birthday':
+          await this.scheduleBirthdayMode();
+          break;
+        case 'normal':
+          await this.scheduleNormalMode();
+          break;
       }
+
+      console.log(`[NotificationScheduler] ${mode} mode scheduled successfully`);
     } catch (error) {
       console.error(`[NotificationScheduler] Failed to schedule ${mode} notifications:`, error);
+      throw error;
     }
   }
 
   /**
-   * Schedule Test Mode notifications
-   * Every 5 minutes from now until June 20
+   * Schedule Test Mode notifications (every 5 minutes until June 17)
    */
   private async scheduleTestMode(): Promise<void> {
     console.log('[NotificationScheduler] Scheduling Test Mode notifications');
 
     const now = new Date();
-    const testModeEndDate = new Date(2026, 5, 20, 0, 0, 0); // June 20, 12:00 AM
+    const testModeEndDate = new Date(2026, 5, 17, 12, 0, 0); // June 17, 12:00 PM
 
-    // Generate notifications every 5 minutes until June 20
-    const notifications = [];
+    const notifications: any[] = [];
     let currentTime = new Date(now);
     let notificationId = 1000;
 
-    while (currentTime < testModeEndDate) {
-      // Get random message
-      let message = this.getRandomTestMessage();
-      while (message === this.lastTestMessage && TEST_MODE_MESSAGES.length > 1) {
-        message = this.getRandomTestMessage();
-      }
-      this.lastTestMessage = message;
+    while (currentTime < testModeEndDate && notificationId < 2000) {
+      const message = getRandomMessage(
+        NOTIFICATION_MESSAGES.goodMorning,
+        this.lastMessages.get('test')
+      );
+      this.lastMessages.set('test', message);
 
       notifications.push({
         id: notificationId,
-        title: 'Our Story ❤️',
+        title: '❤️ Our Story ❤️',
         body: message,
         schedule: {
           at: new Date(currentTime),
@@ -109,10 +98,81 @@ export class NotificationScheduler {
 
       // Add 5 minutes
       currentTime = new Date(currentTime.getTime() + 5 * 60 * 1000);
+    }
 
-      // Limit to prevent too many notifications
-      if (notifications.length >= 288) { // 288 = 24 hours * 60 minutes / 5 minutes
-        break;
+    // Schedule in batches
+    for (let i = 0; i < notifications.length; i += 10) {
+      const batch = notifications.slice(i, i + 10);
+      await NotificationManager.scheduleMultiple(batch);
+    }
+
+    console.log(`[NotificationScheduler] Scheduled ${notifications.length} test notifications`);
+  }
+
+  /**
+   * Schedule Production Mode notifications (June 18-24)
+   * Daily notifications at 8 specific times + Advance Birthday wishes
+   */
+  private async scheduleProductionMode(): Promise<void> {
+    console.log('[NotificationScheduler] Scheduling Production Mode notifications');
+
+    const notifications: any[] = [];
+    let notificationId = 2000;
+
+    // June 18 to June 24 (7 days)
+    for (let day = 18; day < 25; day++) {
+      // Schedule daily notifications at specific hours
+      for (const hour of DAILY_NOTIFICATION_HOURS) {
+        const notificationDate = new Date(2026, 5, day, hour, 0, 0);
+
+        // Skip if in the past
+        if (notificationDate < new Date()) {
+          continue;
+        }
+
+        const notificationType = this.getNotificationTypeByHour(hour);
+
+        if (notificationType) {
+          const message = getRandomMessage(
+            notificationType.messages,
+            this.lastMessages.get(notificationType.type)
+          );
+          this.lastMessages.set(notificationType.type, message);
+
+          notifications.push({
+            id: notificationId,
+            title: '❤️ Our Story ❤️',
+            body: message,
+            schedule: {
+              at: notificationDate,
+            },
+          });
+
+          this.scheduledNotificationIds.push(notificationId);
+          notificationId++;
+        }
+      }
+
+      // Advance birthday wishes at 12 PM
+      const advanceBirthdayDate = new Date(2026, 5, day, 12, 0, 0);
+      if (advanceBirthdayDate >= new Date()) {
+        const advanceBirthdayMessage = getRandomMessage(
+          NOTIFICATION_MESSAGES.advanceBirthdayWishes,
+          this.lastMessages.get('advanceBirthday')
+        );
+        this.lastMessages.set('advanceBirthday', advanceBirthdayMessage);
+
+        notifications.push({
+          id: notificationId,
+          title: '🎂 Advance Birthday Wishes 🎂',
+          body: advanceBirthdayMessage,
+          schedule: {
+            at: advanceBirthdayDate,
+          },
+        });
+
+        this.scheduledNotificationIds.push(notificationId);
+        notificationId++;
       }
     }
 
@@ -122,112 +182,151 @@ export class NotificationScheduler {
       await NotificationManager.scheduleMultiple(batch);
     }
 
-    console.log(`[NotificationScheduler] Scheduled ${notifications.length} test mode notifications`);
+    console.log(`[NotificationScheduler] Scheduled ${notifications.length} production notifications`);
   }
 
   /**
-   * Schedule Production Mode notifications
-   * June 20-24: 7:00 AM and 9:00 PM daily
-   */
-  private async scheduleProductionMode(): Promise<void> {
-    console.log('[NotificationScheduler] Scheduling Production Mode notifications');
-
-    const notifications = [];
-    let notificationId = 2000;
-
-    // June 20-24
-    for (let day = 20; day < 25; day++) {
-      // 7:00 AM
-      const morningDate = new Date(2026, 5, day, 7, 0, 0);
-      if (morningDate > new Date()) {
-        const morningBody = PRODUCTION_MESSAGES.morning.bodies[
-          Math.floor(Math.random() * PRODUCTION_MESSAGES.morning.bodies.length)
-        ];
-
-        notifications.push({
-          id: notificationId,
-          title: PRODUCTION_MESSAGES.morning.title,
-          body: morningBody,
-          schedule: {
-            at: morningDate,
-          },
-        });
-        this.scheduledNotificationIds.push(notificationId);
-        notificationId++;
-      }
-
-      // 9:00 PM
-      const eveningDate = new Date(2026, 5, day, 21, 0, 0);
-      if (eveningDate > new Date()) {
-        const eveningBody = PRODUCTION_MESSAGES.evening.bodies[
-          Math.floor(Math.random() * PRODUCTION_MESSAGES.evening.bodies.length)
-        ];
-
-        notifications.push({
-          id: notificationId,
-          title: PRODUCTION_MESSAGES.evening.title,
-          body: eveningBody,
-          schedule: {
-            at: eveningDate,
-          },
-        });
-        this.scheduledNotificationIds.push(notificationId);
-        notificationId++;
-      }
-    }
-
-    // Schedule all
-    if (notifications.length > 0) {
-      await NotificationManager.scheduleMultiple(notifications);
-      console.log(`[NotificationScheduler] Scheduled ${notifications.length} production mode notifications`);
-    }
-  }
-
-  /**
-   * Schedule Birthday Mode notifications
-   * June 25: 12:00 AM, 7:00 AM, 10:00 AM, 1:00 PM, 6:00 PM, 10:00 PM
+   * Schedule Birthday Mode notifications (June 25)
+   * One notification every hour (24 total)
    */
   private async scheduleBirthdayMode(): Promise<void> {
     console.log('[NotificationScheduler] Scheduling Birthday Mode notifications');
 
-    const notifications = [];
+    const notifications: any[] = [];
     let notificationId = 3000;
 
-    const times = [0, 7, 10, 13, 18, 22]; // Hours
+    const birthdayDate = new Date(2026, 5, 25); // June 25
 
-    for (const hour of times) {
-      const birthdayDate = new Date(2026, 5, 25, hour, 0, 0);
+    // Schedule one notification for each hour (0-23)
+    for (const hour of BIRTHDAY_NOTIFICATION_HOURS) {
+      const notificationDate = new Date(birthdayDate);
+      notificationDate.setHours(hour, 0, 0, 0);
 
-      if (birthdayDate > new Date()) {
-        const body = BIRTHDAY_MESSAGES.bodies[
-          Math.floor(Math.random() * BIRTHDAY_MESSAGES.bodies.length)
-        ];
-
-        notifications.push({
-          id: notificationId,
-          title: BIRTHDAY_MESSAGES.title,
-          body,
-          schedule: {
-            at: birthdayDate,
-          },
-        });
-        this.scheduledNotificationIds.push(notificationId);
-        notificationId++;
+      // Skip if in the past
+      if (notificationDate < new Date()) {
+        continue;
       }
+
+      const message = getRandomMessage(
+        NOTIFICATION_MESSAGES.birthdayWishes,
+        this.lastMessages.get('birthday')
+      );
+      this.lastMessages.set('birthday', message);
+
+      notifications.push({
+        id: notificationId,
+        title: '🎂 Happy Birthday Reddy Sai 🎂',
+        body: message,
+        schedule: {
+          at: notificationDate,
+        },
+      });
+
+      this.scheduledNotificationIds.push(notificationId);
+      notificationId++;
     }
 
-    // Schedule all
-    if (notifications.length > 0) {
-      await NotificationManager.scheduleMultiple(notifications);
-      console.log(`[NotificationScheduler] Scheduled ${notifications.length} birthday mode notifications`);
+    // Schedule in batches
+    for (let i = 0; i < notifications.length; i += 10) {
+      const batch = notifications.slice(i, i + 10);
+      await NotificationManager.scheduleMultiple(batch);
     }
+
+    console.log(`[NotificationScheduler] Scheduled ${notifications.length} birthday notifications`);
   }
 
   /**
-   * Get random test message avoiding duplicates
+   * Schedule Normal Mode notifications (June 26+)
+   * Daily notifications at 8 specific times (no birthday wishes)
    */
-  private getRandomTestMessage(): string {
-    return TEST_MODE_MESSAGES[Math.floor(Math.random() * TEST_MODE_MESSAGES.length)];
+  private async scheduleNormalMode(): Promise<void> {
+    console.log('[NotificationScheduler] Scheduling Normal Mode notifications');
+
+    const notifications: any[] = [];
+    let notificationId = 4000;
+
+    // Get current date and schedule for next 30 days
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let daysAhead = 0; daysAhead < 30; daysAhead++) {
+      const scheduleDate = new Date(today);
+      scheduleDate.setDate(scheduleDate.getDate() + daysAhead);
+
+      // Skip if before June 26
+      if (scheduleDate.getMonth() === 5 && scheduleDate.getDate() < 26) {
+        continue;
+      }
+
+      // Schedule daily notifications at specific hours
+      for (const hour of DAILY_NOTIFICATION_HOURS) {
+        const notificationDate = new Date(scheduleDate);
+        notificationDate.setHours(hour, 0, 0, 0);
+
+        // Skip if in the past
+        if (notificationDate < new Date()) {
+          continue;
+        }
+
+        const notificationType = this.getNotificationTypeByHour(hour);
+
+        if (notificationType) {
+          const message = getRandomMessage(
+            notificationType.messages,
+            this.lastMessages.get(notificationType.type)
+          );
+          this.lastMessages.set(notificationType.type, message);
+
+          notifications.push({
+            id: notificationId,
+            title: '❤️ Our Story ❤️',
+            body: message,
+            schedule: {
+              at: notificationDate,
+            },
+          });
+
+          this.scheduledNotificationIds.push(notificationId);
+          notificationId++;
+        }
+      }
+    }
+
+    // Schedule in batches
+    for (let i = 0; i < notifications.length; i += 10) {
+      const batch = notifications.slice(i, i + 10);
+      await NotificationManager.scheduleMultiple(batch);
+    }
+
+    console.log(`[NotificationScheduler] Scheduled ${notifications.length} normal notifications`);
+  }
+
+  /**
+   * Get notification type and messages by hour
+   */
+  private getNotificationTypeByHour(
+    hour: number
+  ): { type: string; messages: string[] } | null {
+    switch (hour) {
+      case 6:
+        return { type: 'goodMorning', messages: NOTIFICATION_MESSAGES.goodMorning };
+      case 8:
+        return { type: 'breakfast', messages: NOTIFICATION_MESSAGES.breakfast };
+      case 13:
+        return { type: 'lunch', messages: NOTIFICATION_MESSAGES.lunch };
+      case 18:
+        return { type: 'moodCheck', messages: NOTIFICATION_MESSAGES.moodCheck };
+      case 19:
+        return { type: 'familyReminder', messages: NOTIFICATION_MESSAGES.familyReminder };
+      case 20:
+        return { type: 'dinner', messages: NOTIFICATION_MESSAGES.dinner };
+      case 22:
+        return { type: 'goodNight', messages: NOTIFICATION_MESSAGES.goodNight };
+      case 23:
+        return { type: 'screenTime', messages: NOTIFICATION_MESSAGES.screenTime };
+      default:
+        return null;
+    }
   }
 
   /**
