@@ -57,6 +57,7 @@ public class AlarmScheduler {
                 }
             }
         }
+        scheduleTestMode(context);
     }
 
     public static void scheduleTestMode(Context context) {
