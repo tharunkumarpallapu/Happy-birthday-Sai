@@ -16,6 +16,7 @@ public class NotificationReceiver extends BroadcastReceiver {
     private static final String CHANNEL_ID = "romance_story_notifications";
     private static final String PREFS_NAME = "notification_prefs";
     private static final String LAST_MESSAGE_KEY = "last_message_";
+    private static final String LAST_TEST_MESSAGE_KEY = "last_test_message";
     
     private static final int GOOD_MORNING_ID = 1001;
     private static final int BREAKFAST_ID = 1002;
@@ -29,14 +30,14 @@ public class NotificationReceiver extends BroadcastReceiver {
     private static final int BIRTHDAY_ID = 3001;
     private static final int TEST_RANDOM_ID = 9999;
 
-    private static final String[] GOOD_MORNING = {"Good morning Reddy Sai ☀️", "Lechava papa 😅", "Morning sunshine ❤️"};
-    private static final String[] BREAKFAST = {"Breakfast ayinda papa? 🍳", "Healthy breakfast thinuko ❤️"};
-    private static final String[] LUNCH = {"Lunch ayinda papa? 🍛", "Time ki thinuko papa ❤️"};
-    private static final String[] DINNER = {"Dinner ayinda papa? 🍽️", "Time ki thinuko papa 😊"};
-    private static final String[] MOOD_CHECK = {"Mood baagundha papa? ❤️", "Antha okayna?"};
-    private static final String[] FAMILY_CARE = {"Intlo vallaki call chesava papa? 📞", "Amma tho maatladava? ❤️"};
-    private static final String[] GOOD_NIGHT = {"Good night papa ❤️", "Sweet dreams 😴"};
-    private static final String[] SCREEN_TIME = {"Phone pakkana petti paduko papa 😴", "Screen time konchem thagginchu ❤️"};
+    private static final String[] GOOD_MORNING = {"Good morning Reddy Sai ☀️", "Lechava papa 😅", "Morning sunshine ❤️", "Rise and shine 🌞", "New day start ayyindhi 😊"};
+    private static final String[] BREAKFAST = {"Breakfast ayinda papa? 🍳", "Healthy breakfast thinuko ❤️", "Morning meal important papa ❤️"};
+    private static final String[] LUNCH = {"Lunch ayinda papa? 🍛", "Time ki thinuko papa ❤️", "Lunch break enjoy cheyyi 😊"};
+    private static final String[] DINNER = {"Dinner ayinda papa? 🍽️", "Time ki thinuko papa 😊", "Healthy ga dinner cheyyi 🌿"};
+    private static final String[] MOOD_CHECK = {"Mood baagundha papa? ❤️", "Antha okayna?", "Smile chesthunava? 🌸"};
+    private static final String[] FAMILY_CARE = {"Intlo vallaki call chesava papa? 📞", "Amma tho maatladava? ❤️", "Family smiles are special ❤️"};
+    private static final String[] GOOD_NIGHT = {"Good night papa ❤️", "Sweet dreams 😴", "Take care and sleep well 🌸"};
+    private static final String[] SCREEN_TIME = {"Phone pakkana petti paduko papa 😴", "Screen time konchem thagginchu ❤️", "Eyes ki rest ivvu 👀"};
     private static final String[] ADVANCE_BIRTHDAY = {"🎂 Advance Happy Birthday Reddy Sai ❤️", "🎉 Counting days for your special day!"};
     private static final String[] BIRTHDAY_DAY = {"🎂 Happy Birthday Reddy Sai ❤️", "🎉 Many Happy Returns Reddy Sai 🎂"};
 
@@ -50,55 +51,55 @@ public class NotificationReceiver extends BroadcastReceiver {
         String message = "";
         int notificationId = 0;
 
-        switch (action) {
-            case "TEST_RANDOM":
-                String[][] allPools = {GOOD_MORNING, BREAKFAST, LUNCH, MOOD_CHECK, FAMILY_CARE, DINNER, GOOD_NIGHT, SCREEN_TIME};
-                String[] randomPool = allPools[new Random().nextInt(allPools.length)];
-                message = "[TEST] " + randomPool[new Random().nextInt(randomPool.length)];
-                notificationId = TEST_RANDOM_ID;
-                AlarmScheduler.scheduleTestMode(context); // Self-reschedule
-                break;
-            case "GOOD_MORNING":
-                message = getRandomMessage(GOOD_MORNING, "GOOD_MORNING", context);
-                notificationId = GOOD_MORNING_ID;
-                break;
-            case "BREAKFAST":
-                message = getRandomMessage(BREAKFAST, "BREAKFAST", context);
-                notificationId = BREAKFAST_ID;
-                break;
-            case "LUNCH":
-                message = getRandomMessage(LUNCH, "LUNCH", context);
-                notificationId = LUNCH_ID;
-                break;
-            case "DINNER":
-                message = getRandomMessage(DINNER, "DINNER", context);
-                notificationId = DINNER_ID;
-                break;
-            case "MOOD_CHECK":
-                message = getRandomMessage(MOOD_CHECK, "MOOD_CHECK", context);
-                notificationId = MOOD_CHECK_ID;
-                break;
-            case "FAMILY_CARE":
-                message = getRandomMessage(FAMILY_CARE, "FAMILY_CARE", context);
-                notificationId = FAMILY_CARE_ID;
-                break;
-            case "GOOD_NIGHT":
-                message = getRandomMessage(GOOD_NIGHT, "GOOD_NIGHT", context);
-                notificationId = GOOD_NIGHT_ID;
-                break;
-            case "SCREEN_TIME":
-                message = getRandomMessage(SCREEN_TIME, "SCREEN_TIME", context);
-                notificationId = SCREEN_TIME_ID;
-                break;
-            case "ADVANCE_BIRTHDAY":
-                message = getRandomMessage(ADVANCE_BIRTHDAY, "ADVANCE_BIRTHDAY", context);
-                notificationId = ADVANCE_BIRTHDAY_ID;
-                break;
-            case "BIRTHDAY":
-                int hour = intent.getIntExtra("hour", 0);
-                message = getRandomMessage(BIRTHDAY_DAY, "BIRTHDAY", context);
-                notificationId = BIRTHDAY_ID + hour;
-                break;
+        if ("TEST_RANDOM".equals(action)) {
+            message = getTestRandomMessage(context);
+            notificationId = TEST_RANDOM_ID;
+            // Re-schedule for next 5 minutes
+            AlarmScheduler.scheduleTestMode(context);
+        } else {
+            switch (action) {
+                case "GOOD_MORNING":
+                    message = getRandomMessage(GOOD_MORNING, "GOOD_MORNING", context);
+                    notificationId = GOOD_MORNING_ID;
+                    break;
+                case "BREAKFAST":
+                    message = getRandomMessage(BREAKFAST, "BREAKFAST", context);
+                    notificationId = BREAKFAST_ID;
+                    break;
+                case "LUNCH":
+                    message = getRandomMessage(LUNCH, "LUNCH", context);
+                    notificationId = LUNCH_ID;
+                    break;
+                case "DINNER":
+                    message = getRandomMessage(DINNER, "DINNER", context);
+                    notificationId = DINNER_ID;
+                    break;
+                case "MOOD_CHECK":
+                    message = getRandomMessage(MOOD_CHECK, "MOOD_CHECK", context);
+                    notificationId = MOOD_CHECK_ID;
+                    break;
+                case "FAMILY_CARE":
+                    message = getRandomMessage(FAMILY_CARE, "FAMILY_CARE", context);
+                    notificationId = FAMILY_CARE_ID;
+                    break;
+                case "GOOD_NIGHT":
+                    message = getRandomMessage(GOOD_NIGHT, "GOOD_NIGHT", context);
+                    notificationId = GOOD_NIGHT_ID;
+                    break;
+                case "SCREEN_TIME":
+                    message = getRandomMessage(SCREEN_TIME, "SCREEN_TIME", context);
+                    notificationId = SCREEN_TIME_ID;
+                    break;
+                case "ADVANCE_BIRTHDAY":
+                    message = getRandomMessage(ADVANCE_BIRTHDAY, "ADVANCE_BIRTHDAY", context);
+                    notificationId = ADVANCE_BIRTHDAY_ID;
+                    break;
+                case "BIRTHDAY":
+                    int hour = intent.getIntExtra("hour", 0);
+                    message = getRandomMessage(BIRTHDAY_DAY, "BIRTHDAY", context);
+                    notificationId = BIRTHDAY_ID + hour;
+                    break;
+            }
         }
 
         if (!message.isEmpty()) {
@@ -119,6 +120,25 @@ public class NotificationReceiver extends BroadcastReceiver {
                 .setAutoCancel(true);
 
         notificationManager.notify(notificationId, builder.build());
+    }
+
+    private String getTestRandomMessage(Context context) {
+        String[][] allPools = {GOOD_MORNING, BREAKFAST, LUNCH, MOOD_CHECK, FAMILY_CARE, DINNER, GOOD_NIGHT};
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String lastTestMessage = prefs.getString(LAST_TEST_MESSAGE_KEY, "");
+        
+        Random random = new Random();
+        String selectedMessage = "";
+        int attempts = 0;
+        
+        do {
+            String[] pool = allPools[random.nextInt(allPools.length)];
+            selectedMessage = "[TEST] " + pool[random.nextInt(pool.length)];
+            attempts++;
+        } while (selectedMessage.equals(lastTestMessage) && attempts < 10);
+
+        prefs.edit().putString(LAST_TEST_MESSAGE_KEY, selectedMessage).apply();
+        return selectedMessage;
     }
 
     private String getRandomMessage(String[] messages, String type, Context context) {
