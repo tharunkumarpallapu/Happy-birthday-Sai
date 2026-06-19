@@ -10,10 +10,11 @@ interface TimeLeft {
 }
 
 interface BirthdayVaultProps {
+  onNavigate: () => void;
   onPrevious: () => void;
 }
 
-export function BirthdayVault({ onPrevious }: BirthdayVaultProps) {
+export function BirthdayVault({ onNavigate, onPrevious }: BirthdayVaultProps) {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({
     days: 9,
     hours: 8,
@@ -27,7 +28,7 @@ export function BirthdayVault({ onPrevious }: BirthdayVaultProps) {
     window.scrollTo(0, 0);
 
     const calculateCountdown = () => {
-      const targetDate = new Date(2026, 5, 25, 12, 0, 0).getTime();
+      const targetDate = new Date(2026, 5, 19, 12, 0, 0).getTime();
       const now = new Date().getTime();
       const difference = targetDate - now;
 
@@ -242,7 +243,7 @@ export function BirthdayVault({ onPrevious }: BirthdayVaultProps) {
         <div className="text-center space-y-2">
           <p className="text-white/60 text-xs">Unlocks on</p>
           <p className="text-2xl font-bold text-[#FF1493] text-glow-pink">
-            June 25, 2026
+            June 19, 2026
           </p>
           <p className="text-sm text-white/60">❤️ 12:00 AM ❤️</p>
         </div>
@@ -281,7 +282,7 @@ export function BirthdayVault({ onPrevious }: BirthdayVaultProps) {
 
       {/* CTA Button */}
       <motion.button
-        onClick={onPrevious}
+        onClick={onNavigate}
         className="mt-8 px-8 py-3 bg-gradient-to-r from-[#FF1493] to-[#FF4DA6] text-white font-semibold rounded-full neon-border-thick hover:shadow-lg transition-all"
         whileHover={{
           scale: 1.05,

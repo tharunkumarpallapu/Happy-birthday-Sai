@@ -28,7 +28,7 @@ export function Countdown({ onNavigate, onPrevious }: CountdownProps) {
     window.scrollTo(0, 0);
 
     const calculateCountdown = () => {
-      const targetDate = new Date(2026, 5, 25, 12, 0, 0).getTime();
+      const targetDate = new Date(2026, 5, 19, 12, 0, 0).getTime();
       const now = new Date().getTime();
       const difference = targetDate - now;
 
@@ -72,7 +72,7 @@ export function Countdown({ onNavigate, onPrevious }: CountdownProps) {
           <h1 className="text-3xl font-bold text-[#FF1493] animate-glow-pulse">
             ❤️ Our Special Day ❤️
           </h1>
-          <p className="text-sm text-white/60">June 25, 12:00 AM</p>
+          <p className="text-sm text-white/60">June 19, 12:00 AM</p>
           <p className="text-xs text-white/50">The day you were born ✨</p>
         </motion.div>
       </motion.div>

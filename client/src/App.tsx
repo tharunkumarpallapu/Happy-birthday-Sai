@@ -188,6 +188,7 @@ function StoryApp() {
       case 'vault':
         return (
           <BirthdayVault
+            onNavigate={() => handleNavigate('celebration')}
             onPrevious={() => handleNavigate('numbers')}
           />
         );
