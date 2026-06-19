@@ -27,9 +27,16 @@
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="MORNING_NOTIFICATION" />
-                <action android:name="NIGHT_NOTIFICATION" />
-                <action android:name="BIRTHDAY_NOTIFICATION" />
+                <action android:name="GOOD_MORNING" />
+                <action android:name="BREAKFAST" />
+                <action android:name="LUNCH" />
+                <action android:name="MOOD_CHECK" />
+                <action android:name="FAMILY_CARE" />
+                <action android:name="DINNER" />
+                <action android:name="GOOD_NIGHT" />
+                <action android:name="SCREEN_TIME" />
+                <action android:name="ADVANCE_BIRTHDAY" />
+                <action android:name="BIRTHDAY" />
             </intent-filter>
         </receiver>
 
