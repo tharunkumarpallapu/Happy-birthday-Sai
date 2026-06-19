@@ -89,7 +89,7 @@ export class NotificationManager {
             schedule: options.schedule ? {
               at: options.schedule.at,
             } : undefined,
-            smallIcon: options.smallIcon,
+            smallIcon: 'ic_stat_romance',
             largeBody: options.largeBody,
             summaryText: options.summaryText,
           },
@@ -128,7 +128,7 @@ export class NotificationManager {
         schedule: opt.schedule ? {
           at: opt.schedule.at,
         } : undefined,
-        smallIcon: opt.smallIcon,
+        smallIcon: 'ic_stat_romance',
         largeBody: opt.largeBody,
         summaryText: opt.summaryText,
       }));

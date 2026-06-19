@@ -5,15 +5,15 @@ import android.content.Context;
 import android.content.Intent;
 
 public class BootReceiver extends BroadcastReceiver {
+
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (intent.getAction() != null && 
-            (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED) || 
-             intent.getAction().equals("android.intent.action.QUICKBOOT_POWERON"))) {
-            
-            AlarmScheduler.scheduleMorningNotification(context);
-            AlarmScheduler.scheduleNightNotification(context);
-            AlarmScheduler.scheduleBirthdayNotifications(context);
+
+        if (intent != null &&
+            (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction()) ||
+             "android.intent.action.QUICKBOOT_POWERON".equals(intent.getAction()))) {
+
+            AlarmScheduler.scheduleAllNotifications(context);
         }
     }
 }

@@ -1,4 +1,5 @@
 package com.romancestory.app;
+import android.util.Log;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -7,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import androidx.core.app.NotificationCompat;
+import com.romance.story.R;
 import java.util.Calendar;
 import java.util.Random;
 
@@ -462,9 +464,10 @@ public class NotificationReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        Log.e("TEST_ALARM", "FIRED");
+        showNotification(context, 9999, "ALARM RECEIVED");
         String action = intent.getAction();
         if (action == null) {
-            return;
         }
 
         String message = "";
@@ -517,6 +520,7 @@ public class NotificationReceiver extends BroadcastReceiver {
 
         if (!message.isEmpty()) {
             showNotification(context, notificationId, message);
+            AlarmScheduler.scheduleAllNotifications(context);
         }
     }
 
@@ -531,7 +535,7 @@ public class NotificationReceiver extends BroadcastReceiver {
 
         if (notificationManager != null) {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                    .setSmallIcon(android.R.drawable.ic_dialog_info)
+                    .setSmallIcon(R.drawable.ic_stat_romance)
                     .setContentTitle("Reddy Sai")
                     .setContentText(message)
                     .setStyle(new NotificationCompat.BigTextStyle().bigText(message))

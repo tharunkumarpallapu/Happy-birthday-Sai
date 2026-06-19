@@ -125,7 +125,7 @@ public class MainActivity extends BridgeActivity {
             SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
             boolean alreadyInitialized = prefs.getBoolean(INIT_KEY, false);
 
-            if (alreadyInitialized) {
+            if (false && alreadyInitialized) {
                 Log.d(TAG, "Notifications already initialized, skipping duplicate scheduling");
                 return;
             }
