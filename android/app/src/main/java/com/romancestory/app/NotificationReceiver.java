@@ -467,6 +467,35 @@ public class NotificationReceiver extends BroadcastReceiver {
         Log.e("TEST_ALARM", "FIRED");
         showNotification(context, 9999, "ALARM RECEIVED");
         String action = intent.getAction();
+
+        if ("TEST_RANDOM".equals(action)) {
+
+            String[][] pools = {
+                GOOD_MORNING,
+                BREAKFAST,
+                LUNCH,
+                MOOD_CHECK,
+                FAMILY_CARE,
+                DINNER,
+                GOOD_NIGHT
+            };
+
+            Random random = new Random();
+
+            String[] selectedPool =
+                    pools[random.nextInt(pools.length)];
+
+            String message =
+                    selectedPool[random.nextInt(selectedPool.length)];
+
+            showNotification(
+                    context,
+                    9998,
+                    message
+            );
+
+            return;
+        }
         if (action == null) {
         }
 
